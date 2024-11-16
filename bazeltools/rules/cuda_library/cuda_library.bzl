@@ -29,6 +29,7 @@ def impl(ctx):
         flags += ["-I" + d for d in dep[CcInfo].compilation_context.includes.to_list()]
         flags += ["-I" + d for d in dep[CcInfo].compilation_context.quote_includes.to_list()]
         flags += ["-I" + d for d in dep[CcInfo].compilation_context.system_includes.to_list()]
+    
     args = [f.path for f in ctx.files.srcs]
     args += [
         "-D__CUDACC__",
@@ -56,6 +57,8 @@ def impl(ctx):
     args += ["--output-file " + cuda_lib_file.path]
     args += ["-I."]
     args += flags
+    args += ctx.attr.copts
+
     command = "nvcc %s" % (" ".join(args))
     ctx.actions.run_shell(
         inputs = inputs,
@@ -64,12 +67,14 @@ def impl(ctx):
         command = command,
     )
     return [DefaultInfo(files = depset([cuda_lib_file])), CcInfo()]
+
 cuda_library = rule(
     attrs = {
         "hdrs": attr.label_list(allow_files = _CUDA_HEADERS),
         "srcs": attr.label_list(allow_files = _CUDA_SRCS),
         "deps": attr.label_list(),
         "flags": attr.string_list(),
+        "copts": attr.string_list(),
     },
     implementation = impl,
 )

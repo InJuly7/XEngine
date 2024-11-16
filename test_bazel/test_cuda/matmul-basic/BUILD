@@ -11,6 +11,9 @@ cuda_library(
     deps = [
         "@cuda",
     ],
+    copts = [
+        "-ccbin=/usr/bin/gcc-12",
+    ]
 )
 
 cc_library(
